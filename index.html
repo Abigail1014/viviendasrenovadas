@@ -1,0 +1,1788 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1.2-1 Casas Renovadas Proyecto Vida PC - Riberalta</title>
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        background-color: #f4f6f9;
+        color: #333;
+        overflow: hidden;
+      }
+
+      .app-container {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+      }
+
+      /* Panel Lateral Sidebar */
+      .sidebar {
+        width: 420px;
+        background: #ffffff;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Logos Oficiales */
+      #header-logos {
+        background: #0f172a;
+        padding: 8px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        align-items: center;
+        border-bottom: 1px solid #1e293b;
+      }
+      .logo-img {
+        height: 24px;
+        background: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+      }
+
+      .sidebar-header {
+        padding: 15px 20px;
+        background: #0f172a;
+        color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .sidebar-header-title h1 {
+        margin: 0 0 4px 0;
+        font-size: 1.15rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .sidebar-header-title p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #94a3b8;
+      }
+
+      /* Controles y Filtros */
+      .controls {
+        padding: 12px 16px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 0.88rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      .search-input:focus {
+        border-color: #2563eb;
+      }
+
+      .sector-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .filter-btn {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .filter-btn.active {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+      }
+
+      /* Lista de Viviendas */
+      .viviendas-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px 16px;
+      }
+
+      .vivienda-card {
+        padding: 12px;
+        margin-bottom: 10px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 5px solid #94a3b8;
+        border-radius: 6px;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .vivienda-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      }
+
+      .vivienda-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .vivienda-info h3 {
+        margin: 0 0 2px 0;
+        font-size: 0.92rem;
+        color: #0f172a;
+      }
+
+      .vivienda-info p {
+        margin: 0;
+        font-size: 0.78rem;
+        color: #64748b;
+      }
+
+      .badge-sector {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .btn-edit-ficha {
+        width: 100%;
+        margin-top: 4px;
+        padding: 6px 10px;
+        background: #004a99;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+        transition: background 0.2s;
+      }
+
+      .btn-edit-ficha:hover {
+        background: #003366;
+      }
+
+      /* Acciones de exportación */
+      .sidebar-footer {
+        padding: 10px 16px;
+        background: #f1f5f9;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        gap: 6px;
+      }
+
+      .btn-action {
+        flex: 1;
+        padding: 8px 4px;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: #0f172a;
+        color: white;
+        text-align: center;
+        transition: background 0.2s;
+      }
+
+      .btn-action:hover {
+        background: #334155;
+      }
+
+      /* Contenedor del Mapa */
+      #map {
+        flex: 1;
+        height: 100%;
+        width: 100%;
+        position: relative;
+      }
+
+      /* Marcador CSS Personalizado */
+      .custom-marker {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #3b82f6;
+        border: 2px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+      }
+
+      /* Popups del Mapa */
+      .popup-box {
+        font-family: sans-serif;
+      }
+      .popup-box h3 {
+        margin: 0 0 6px 0;
+        font-size: 0.95rem;
+        color: #1e293b;
+      }
+      .popup-box p {
+        margin: 2px 0;
+        font-size: 0.82rem;
+        color: #475569;
+      }
+
+      /* Modal / Editor Overlay Wizard - Con Scroll Vertical Habilitado */
+      #editor-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+        overflow-y: auto;
+        padding: 20px 0;
+      }
+
+      #editor-form {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 92%;
+        max-width: 540px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-sizing: border-box;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        margin: auto;
+      }
+
+      .btn-viviendas-reg {
+        background-color: #004a99;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 0.85em;
+        width: 100%;
+        margin-bottom: 12px;
+        text-align: center;
+      }
+
+      .wizard-steps {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        background: #eef2f7;
+        padding: 6px;
+        border-radius: 6px;
+        gap: 2px;
+        flex-wrap: wrap;
+      }
+
+      .step-dot {
+        font-size: 0.68em;
+        font-weight: bold;
+        color: #555;
+        padding: 5px 2px;
+        border-radius: 4px;
+        background: #e2e8f0;
+        text-align: center;
+        flex: 1 0 22%;
+        cursor: pointer;
+        border: none;
+        margin: 1px;
+      }
+      .step-dot.active {
+        background: #004a99;
+        color: white;
+      }
+      .step-dot.completed {
+        background: #28a745;
+        color: white;
+      }
+
+      .ficha-section {
+        display: none;
+        margin-top: 10px;
+        padding: 15px;
+        background: #ffffff;
+        border-radius: 8px;
+        font-size: 0.88em;
+        border: 1px solid #d1d9e0;
+      }
+      .ficha-section.active-step {
+        display: block;
+        animation: fadeIn 0.25s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .ficha-section h4 {
+        margin: 0 0 12px 0;
+        color: #004a99;
+        font-size: 1.05em;
+        border-bottom: 2px solid #004a99;
+        padding-bottom: 5px;
+      }
+
+      .form-group {
+        margin-bottom: 10px;
+      }
+      .form-group label {
+        display: block;
+        font-weight: bold;
+        font-size: 0.82em;
+        margin-bottom: 3px;
+        color: #333;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 7px;
+        box-sizing: border-box;
+        font-size: 0.9em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .file-status {
+        display: block;
+        font-size: 0.75em;
+        color: #28a745;
+        margin-top: 2px;
+        font-weight: bold;
+      }
+
+      .form-nav-buttons {
+        display: flex;
+        gap: 8px;
+        margin-top: 15px;
+        border-top: 1px solid #eee;
+        padding-top: 12px;
+        flex-wrap: wrap;
+      }
+      .btn-nav {
+        flex: 1;
+        padding: 9px;
+        cursor: pointer;
+        border-radius: 4px;
+        font-weight: bold;
+        border: none;
+        font-size: 0.85em;
+        text-align: center;
+      }
+      .btn-prev {
+        background: #6c757d;
+        color: white;
+      }
+      .btn-next {
+        background: #004a99;
+        color: white;
+      }
+      .btn-cancel {
+        background: #dc3545;
+        color: white;
+      }
+      .btn-save {
+        background: #28a745;
+        color: white;
+        min-width: 100px;
+      }
+
+      /* Indicador de carga y Toast */
+      #loading-indicator {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 74, 153, 0.95);
+        color: white;
+        padding: 10px 18px;
+        border-radius: 6px;
+        z-index: 3000;
+        font-size: 0.85em;
+        font-weight: bold;
+        display: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      #toast-saved {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 3000;
+        display: none;
+      }
+
+      .btn-msg-guardado {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.75em;
+        font-weight: bold;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      @media (max-width: 768px) {
+        .app-container {
+          flex-direction: column-reverse;
+        }
+        .sidebar {
+          width: 100%;
+          height: 50vh;
+        }
+        #map {
+          height: 50vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loading-indicator">Sincronizando con Google Sheets...</div>
+    <div id="toast-saved">¡Ficha y Planos guardados con éxito!</div>
+
+    <div class="app-container">
+      <!-- Panel Izquierdo Sidebar -->
+      <div class="sidebar">
+        <!-- Logos Oficiales -->
+        <div id="header-logos">
+          <img
+            src="https://lh3.googleusercontent.com/d/1s50cSDpxq_Y7FmAvVEXP5fMrKDSNCJYT"
+            alt="KOICA"
+            class="logo-img"
+          />
+          <img
+            src="https://lh3.googleusercontent.com/d/1lxonlJdF6Foe0J3SM6h_olLYtkbAl9ik"
+            alt="World Vision"
+            class="logo-img"
+          />
+        </div>
+
+        <!-- Header Sidebar -->
+        <div class="sidebar-header">
+          <div class="sidebar-header-title">
+            <h1>📍 1.2-1 Casas Renovadas</h1>
+            <p>35 Puntos clasificados en 5 Comunidades</p>
+          </div>
+          <button
+            type="button"
+            class="btn-msg-guardado"
+            onclick="cargarDatosDesdeGoogleSheets()"
+          >
+            🔄 Recargar
+          </button>
+        </div>
+
+        <!-- Buscador y Filtros por Sector -->
+        <div class="controls">
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Buscar por código o comunidad..."
+            oninput="filtrarViviendas()"
+          />
+          <div class="sector-filters" id="sectorFilters">
+            <button
+              class="filter-btn active"
+              onclick="filtrarSector('TODOS', this)"
+            >
+              Todas (35)
+            </button>
+            <button class="filter-btn" onclick="filtrarSector('Beni', this)">
+              Beni
+            </button>
+            <button
+              class="filter-btn"
+              onclick="filtrarSector('Bioceanica', this)"
+            >
+              Bioceanica
+            </button>
+            <button
+              class="filter-btn"
+              onclick="filtrarSector('Las Arenas', this)"
+            >
+              Las Arenas
+            </button>
+            <button
+              class="filter-btn"
+              onclick="filtrarSector('La Esperanza', this)"
+            >
+              La Esperanza
+            </button>
+            <button class="filter-btn" onclick="filtrarSector('Popechi', this)">
+              Popechi
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista Dinámica de Viviendas -->
+        <div class="viviendas-list" id="viviendasList"></div>
+
+        <!-- Botones de Exportación -->
+        <div class="sidebar-footer">
+          <button class="btn-action" onclick="exportarGPX()">
+            📡 Descargar GPX
+          </button>
+          <button class="btn-action" onclick="exportarKML()">
+            🌍 Exportar KML
+          </button>
+          <button class="btn-action" onclick="exportarCSV()">
+            📊 Exportar CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenedor del Mapa -->
+      <div id="map">
+        <!-- Overlay del Editor Formulario Asistente (Wizard) -->
+        <div id="editor-overlay">
+          <div id="editor-form">
+            <button
+              type="button"
+              class="btn-viviendas-reg"
+              onclick="cerrarEditor()"
+            >
+              ⬅ Volver a Lista de Viviendas
+            </button>
+
+            <h3
+              id="editor-titulo"
+              style="
+                margin-top: 0;
+                color: #004a99;
+                text-align: center;
+                font-size: 1.1em;
+              "
+            >
+              Ficha Técnica y Planos de Mejoramiento
+            </h3>
+
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+                background: #eef2f7;
+                padding: 6px;
+                border-radius: 6px;
+              "
+            >
+              <button
+                type="button"
+                onclick="navegarFicha(-1)"
+                class="btn-nav btn-prev"
+                style="
+                  flex: 0 0 auto;
+                  padding: 4px 8px;
+                  font-size: 0.75em;
+                  margin: 0;
+                "
+              >
+                ◀ Anter.
+              </button>
+              <span
+                id="ficha-counter"
+                style="font-weight: bold; font-size: 0.8em; color: #004a99"
+                >Ficha 1 de 35</span
+              >
+              <button
+                type="button"
+                onclick="navegarFicha(1)"
+                class="btn-nav btn-next"
+                style="
+                  flex: 0 0 auto;
+                  padding: 4px 8px;
+                  font-size: 0.75em;
+                  margin: 0;
+                "
+              >
+                Sig. ▶
+              </button>
+            </div>
+
+            <!-- Pestañas para los 8 pasos -->
+            <div class="wizard-steps">
+              <button
+                type="button"
+                class="step-dot active"
+                id="dot-1"
+                onclick="irAPaso(1)"
+              >
+                1. Gral
+              </button>
+              <button
+                type="button"
+                class="step-dot"
+                id="dot-2"
+                onclick="irAPaso(2)"
+              >
+                2. Caract.
+              </button>
+              <button
+                type="button"
+                class="step-dot"
+                id="dot-3"
+                onclick="irAPaso(3)"
+              >
+                3. Fotos
+              </button>
+              <button
+                type="button"
+                class="step-dot"
+                id="dot-4"
+                onclick="irAPaso(4)"
+              >
+                4. Diag.
+              </button>
+              <button
+                type="button"
+                class="step-dot"
+                id="dot-5"
+                onclick="irAPaso(5)"
+              >
+                5. Malaria
+              </button>
+              <button
+                type="button"
+                class="step-dot"
+                id="dot-6"
+                onclick="irAPaso(6)"
+              >
+                6. Prop./Planos
+              </button>
+              <button
+                type="button"
+                class="step-dot"
+                id="dot-7"
+                onclick="irAPaso(7)"
+              >
+                7. Presup.
+              </button>
+              <button
+                type="button"
+                class="step-dot"
+                id="dot-8"
+                onclick="irAPaso(8)"
+              >
+                8. Valid.
+              </button>
+            </div>
+
+            <!-- 1. Datos Generales -->
+            <div class="ficha-section active-step" id="step-1">
+              <h4>1. Datos Generales</h4>
+              <div class="form-group">
+                <label>Código de vivienda:</label
+                ><input type="text" id="codigo" />
+              </div>
+              <div class="form-group" style="display: none">
+                <input type="text" id="jefe" />
+              </div>
+              <div class="form-group">
+                <label>Número de integrantes:</label
+                ><input type="number" id="integrantes" />
+              </div>
+              <div class="form-group">
+                <label>Teléfono de contacto:</label
+                ><input type="text" id="telefono" />
+              </div>
+              <div class="form-group">
+                <label>Barrio / Comunidad:</label
+                ><input type="text" id="barrio" />
+              </div>
+              <div class="form-group">
+                <label>Coordenadas GPS:</label
+                ><input
+                  type="text"
+                  id="gps"
+                  readonly
+                  style="background: #e9ecef"
+                />
+              </div>
+            </div>
+
+            <!-- 2. Características de la Vivienda -->
+            <div class="ficha-section" id="step-2">
+              <h4>2. Características de la Vivienda</h4>
+              <div class="form-group">
+                <label>Material de piso:</label
+                ><input type="text" id="mat-piso" />
+              </div>
+              <div class="form-group">
+                <label>Material de paredes:</label
+                ><input type="text" id="mat-paredes" />
+              </div>
+              <div class="form-group">
+                <label>Material de techo:</label
+                ><input type="text" id="mat-techo" />
+              </div>
+              <div class="form-group">
+                <label>Número de ambientes:</label
+                ><input type="number" id="ambientes" />
+              </div>
+              <div class="form-group">
+                <label>Estado general de la vivienda:</label>
+                <select id="estado-general">
+                  <option value="Bueno">Bueno</option>
+                  <option value="Regular">Regular</option>
+                  <option value="Malo">Malo</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Registro Fotográfico (PNG, JPG) -->
+            <div class="ficha-section" id="step-3">
+              <h4>3. Registro Fotográfico (PNG, JPG)</h4>
+              <div class="form-group">
+                <label>Subir Foto Fachada:</label>
+                <input
+                  type="file"
+                  id="foto-fachada"
+                  accept="image/png, image/jpeg, .png, .jpg, .jpeg"
+                />
+                <span id="status-foto-fachada" class="file-status"></span>
+              </div>
+              <div class="form-group">
+                <label>Subir Foto Interior:</label>
+                <input
+                  type="file"
+                  id="foto-interior"
+                  accept="image/png, image/jpeg, .png, .jpg, .jpeg"
+                />
+                <span id="status-foto-interior" class="file-status"></span>
+              </div>
+              <div class="form-group">
+                <label>Subir Foto Área a Intervenir:</label>
+                <input
+                  type="file"
+                  id="foto-area"
+                  accept="image/png, image/jpeg, .png, .jpg, .jpeg"
+                />
+                <span id="status-foto-area" class="file-status"></span>
+              </div>
+            </div>
+
+            <!-- 4. Diagnóstico Técnico -->
+            <div class="ficha-section" id="step-4">
+              <h4>4. Diagnóstico Técnico</h4>
+              <div class="form-group">
+                <label>Principales deficiencias identificadas:</label
+                ><textarea
+                  id="diag-deficiencias"
+                  style="height: 60px"
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label>Estado de pisos, paredes y techos:</label
+                ><textarea id="diag-estructura" style="height: 60px"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Observaciones técnicas:</label
+                ><textarea
+                  id="diag-observaciones"
+                  style="height: 60px"
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- 5. Factores de Riesgo para Malaria -->
+            <div class="ficha-section" id="step-5">
+              <h4>5. Factores de Riesgo para Malaria</h4>
+              <div class="form-group">
+                <label>Presencia de aberturas en paredes:</label
+                ><select id="malaria-aberturas">
+                  <option value="Sí">Sí</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Estado del techo:</label
+                ><select id="malaria-techo">
+                  <option value="Bueno">Bueno</option>
+                  <option value="Regular">Regular</option>
+                  <option value="Malo">Malo</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Ventanas sin protección o mallas:</label
+                ><select id="malaria-ventanas">
+                  <option value="Sí">Sí</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Acumulación de agua alrededor:</label
+                ><select id="malaria-agua">
+                  <option value="Sí">Sí</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Nivel de riesgo identificado:</label
+                ><select id="malaria-riesgo">
+                  <option value="Alto">Alto</option>
+                  <option value="Medio">Medio</option>
+                  <option value="Bajo">Bajo</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. Propuesta de Intervención y Planos (Word y PDF) -->
+            <div class="ficha-section" id="step-6">
+              <h4>6. Propuesta de Intervención y Planos</h4>
+              <div class="form-group">
+                <label>Descripción de las mejoras propuestas:</label
+                ><textarea id="propuesta-desc" style="height: 60px"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Subir Plano Actual (PDF o Word):</label>
+                <input
+                  type="file"
+                  id="plano-actual"
+                  accept=".pdf, .doc, .docx, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                />
+                <span id="status-plano-actual" class="file-status"></span>
+              </div>
+              <div class="form-group">
+                <label>Subir Plano de Intervención (PDF o Word):</label>
+                <input
+                  type="file"
+                  id="plano-intervencion"
+                  accept=".pdf, .doc, .docx, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                />
+                <span id="status-plano-intervencion" class="file-status"></span>
+              </div>
+            </div>
+
+            <!-- 7. Presupuesto -->
+            <div class="ficha-section" id="step-7">
+              <h4>7. Presupuesto</h4>
+              <div class="form-group">
+                <label>Materiales (Bs):</label
+                ><input
+                  type="number"
+                  id="pres-mat"
+                  value="0"
+                  oninput="calcularTotalPresupuesto()"
+                />
+              </div>
+              <div class="form-group">
+                <label>Mano de obra (Bs):</label
+                ><input
+                  type="number"
+                  id="pres-mo"
+                  value="0"
+                  oninput="calcularTotalPresupuesto()"
+                />
+              </div>
+              <div class="form-group">
+                <label>Transporte (Bs):</label
+                ><input
+                  type="number"
+                  id="pres-trans"
+                  value="0"
+                  oninput="calcularTotalPresupuesto()"
+                />
+              </div>
+              <div class="form-group">
+                <label>Total General (Bs):</label
+                ><input
+                  type="number"
+                  id="pres-total"
+                  value="0"
+                  readonly
+                  style="font-weight: bold; background: #e9ecef"
+                />
+              </div>
+            </div>
+
+            <!-- 8. Validación -->
+            <div class="ficha-section" id="step-8">
+              <h4>8. Validación</h4>
+              <div class="form-group">
+                <label>Nombre y firma del beneficiario:</label
+                ><input type="text" id="val-beneficiario" />
+              </div>
+              <div class="form-group">
+                <label>Nombre y firma del técnico responsable:</label
+                ><input type="text" id="val-tecnico" />
+              </div>
+              <div class="form-group">
+                <label>Fecha de aprobación:</label
+                ><input type="date" id="val-fecha" />
+              </div>
+            </div>
+
+            <!-- Botones de Navegación y Guardado -->
+            <div class="form-nav-buttons">
+              <button
+                type="button"
+                id="btn-anterior"
+                class="btn-nav btn-prev"
+                onclick="cambiarPaso(-1)"
+                style="display: none"
+              >
+                Atrás
+              </button>
+              <button
+                type="button"
+                id="btn-cancelar"
+                class="btn-nav btn-cancel"
+                onclick="cerrarEditor()"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                id="btn-siguiente"
+                class="btn-nav btn-next"
+                onclick="cambiarPaso(1)"
+              >
+                Continuar
+              </button>
+              <button
+                type="button"
+                id="btn-guardar"
+                class="btn-nav btn-save"
+                onclick="guardarCambios()"
+              >
+                Guardar Todo
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+      const WEB_APP_URL =
+        "https://script.google.com/macros/s/AKfycbxgZxF4mtmaK9kJbRqTPriQWaLUfPdvUfvpS5lqxNciDv9l-yEngzJiR04U2mxexTCq/exec";
+
+      const coloresSector = {
+        Beni: "#2563eb",
+        Bioceanica: "#16a34a",
+        "Las Arenas": "#d97706",
+        "La Esperanza": "#dc2626",
+        Popechi: "#9333ea",
+      };
+
+      const viviendasBase = [
+        {
+          id: 1,
+          jefe: "",
+          sector: "Beni",
+          lat: -11.047551033598904,
+          lng: -66.02233471468952,
+        },
+        {
+          id: 2,
+          jefe: "",
+          sector: "Beni",
+          lat: -11.047598370844042,
+          lng: -66.02229055391312,
+        },
+        {
+          id: 3,
+          jefe: "",
+          sector: "Beni",
+          lat: -11.045228749670759,
+          lng: -66.02512905393678,
+        },
+        {
+          id: 4,
+          jefe: "",
+          sector: "Beni",
+          lat: -11.0464274,
+          lng: -66.0244579,
+        },
+        {
+          id: 5,
+          jefe: "",
+          sector: "Beni",
+          lat: -11.044850185708839,
+          lng: -66.02262961250764,
+        },
+        {
+          id: 6,
+          jefe: "",
+          sector: "Beni",
+          lat: -11.048563555867586,
+          lng: -66.0254377854239,
+        },
+        {
+          id: 7,
+          jefe: "",
+          sector: "Beni",
+          lat: -11.045231017322058,
+          lng: -66.02512503340463,
+        },
+        {
+          id: 8,
+          jefe: "",
+          sector: "Bioceanica",
+          lat: -11.05234,
+          lng: -66.038,
+        },
+        {
+          id: 9,
+          jefe: "",
+          sector: "Bioceanica",
+          lat: -11.053446,
+          lng: -66.035796,
+        },
+        {
+          id: 10,
+          jefe: "",
+          sector: "Bioceanica",
+          lat: -11.054874,
+          lng: -66.035635,
+        },
+        {
+          id: 11,
+          jefe: "",
+          sector: "Bioceanica",
+          lat: -11.052187,
+          lng: -66.037895,
+        },
+        {
+          id: 12,
+          jefe: "",
+          sector: "Bioceanica",
+          lat: -11.04801,
+          lng: -66.035759,
+        },
+        {
+          id: 13,
+          jefe: "",
+          sector: "Bioceanica",
+          lat: -11.050789,
+          lng: -66.034208,
+        },
+        {
+          id: 14,
+          jefe: "",
+          sector: "Bioceanica",
+          lat: -11.0489955,
+          lng: -66.0357591,
+        },
+        {
+          id: 15,
+          jefe: "",
+          sector: "Las Arenas",
+          lat: -11.026515,
+          lng: -66.0221957,
+        },
+        {
+          id: 16,
+          jefe: "",
+          sector: "Las Arenas",
+          lat: -11.0246145,
+          lng: -66.0231758,
+        },
+        {
+          id: 17,
+          jefe: "",
+          sector: "Las Arenas",
+          lat: -11.0235433,
+          lng: -66.0238387,
+        },
+        {
+          id: 18,
+          jefe: "",
+          sector: "Las Arenas",
+          lat: -11.025945,
+          lng: -66.0239217,
+        },
+        {
+          id: 19,
+          jefe: "",
+          sector: "Las Arenas",
+          lat: -11.0259768,
+          lng: -66.0229375,
+        },
+        {
+          id: 20,
+          jefe: "",
+          sector: "Las Arenas",
+          lat: -11.0242024,
+          lng: -66.0244402,
+        },
+        {
+          id: 21,
+          jefe: "",
+          sector: "Las Arenas",
+          lat: -11.026805,
+          lng: -66.0242617,
+        },
+        {
+          id: 22,
+          jefe: "",
+          sector: "La Esperanza",
+          lat: -11.0646733,
+          lng: -66.0544717,
+        },
+        {
+          id: 23,
+          jefe: "",
+          sector: "La Esperanza",
+          lat: -11.06619,
+          lng: -66.0556538,
+        },
+        {
+          id: 24,
+          jefe: "",
+          sector: "La Esperanza",
+          lat: -11.0640382,
+          lng: -66.0535178,
+        },
+        {
+          id: 25,
+          jefe: "",
+          sector: "La Esperanza",
+          lat: -11.0649825,
+          lng: -66.0549961,
+        },
+        {
+          id: 26,
+          jefe: "",
+          sector: "La Esperanza",
+          lat: -11.0661804,
+          lng: -66.055533,
+        },
+        {
+          id: 27,
+          jefe: "",
+          sector: "La Esperanza",
+          lat: -11.0661789,
+          lng: -66.055508,
+        },
+        {
+          id: 28,
+          jefe: "",
+          sector: "La Esperanza",
+          lat: -11.0643224,
+          lng: -66.053974,
+        },
+        {
+          id: 29,
+          jefe: "",
+          sector: "Popechi",
+          lat: -11.1301608,
+          lng: -66.0735092,
+        },
+        {
+          id: 30,
+          jefe: "",
+          sector: "Popechi",
+          lat: -11.1307667,
+          lng: -66.0731317,
+        },
+        {
+          id: 31,
+          jefe: "",
+          sector: "Popechi",
+          lat: -11.1324785,
+          lng: -66.0735844,
+        },
+        {
+          id: 32,
+          jefe: "",
+          sector: "Popechi",
+          lat: -11.1265745,
+          lng: -66.0747918,
+        },
+        {
+          id: 33,
+          jefe: "",
+          sector: "Popechi",
+          lat: -11.1319513,
+          lng: -66.0734005,
+        },
+        {
+          id: 34,
+          jefe: "",
+          sector: "Popechi",
+          lat: -11.13106,
+          lng: -66.0719884,
+        },
+        {
+          id: 35,
+          jefe: "",
+          sector: "Popechi",
+          lat: -11.1324775,
+          lng: -66.0735837,
+        },
+      ];
+
+      let viviendas = [];
+      let markersMap = {};
+      let sectorActivo = "TODOS";
+      let vSel = null;
+      let pasoActual = 1;
+      const totalPasos = 8;
+
+      const map = L.map("map");
+      
+      // Capa base totalmente libre y pública (OpenStreetMap Francia / Topo sin restricciones de API Key)
+      const osmFreeLayer = L.tileLayer(
+        "https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
+        {
+          maxZoom: 20,
+          attribution: '&copy; OpenStreetMap France | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }
+      ).addTo(map);
+
+      const satellite = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "Tiles © Esri" },
+      );
+      L.control.layers({ "Mapa Libre (OSM Fr)": osmFreeLayer, Satelital: satellite }).addTo(map);
+
+      function mostrarCargando(m) {
+        document.getElementById("loading-indicator").style.display = m
+          ? "block"
+          : "none";
+      }
+
+      function mostrarToast(texto = "¡Ficha y Planos guardados con éxito!") {
+        const t = document.getElementById("toast-saved");
+        t.innerText = texto;
+        t.style.display = "block";
+        setTimeout(() => (t.style.display = "none"), 3000);
+      }
+
+      function leerArchivoComoBase64(file) {
+        return new Promise((resolve, reject) => {
+          if (!file) return resolve("");
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (error) => reject(error);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function calcularTotalPresupuesto() {
+        const m = Number(document.getElementById("pres-mat").value) || 0;
+        const mo = Number(document.getElementById("pres-mo").value) || 0;
+        const tr = Number(document.getElementById("pres-trans").value) || 0;
+        document.getElementById("pres-total").value = m + mo + tr;
+      }
+
+      function calcularCoordenadasDisplay() {
+        const grupos = {};
+        viviendasBase.forEach((v) => {
+          const key = v.lat.toFixed(4) + "," + v.lng.toFixed(4);
+          if (!grupos[key]) grupos[key] = [];
+          grupos[key].push(v);
+        });
+
+        const display = {};
+        Object.values(grupos).forEach((grupo) => {
+          if (grupo.length === 1) {
+            display[grupo[0].id] = { lat: grupo[0].lat, lng: grupo[0].lng };
+          } else {
+            const offset = 0.00007;
+            grupo.forEach((v, idx) => {
+              const angulo = ((2 * Math.PI) / grupo.length) * idx;
+              display[v.id] = {
+                lat: v.lat + Math.sin(angulo) * offset,
+                lng: v.lng + Math.cos(angulo) * offset,
+              };
+            });
+          }
+        });
+        return display;
+      }
+
+      const coordenadasDisplay = calcularCoordenadasDisplay();
+
+      async function cargarDatosDesdeGoogleSheets() {
+        mostrarCargando(true);
+        let result = [];
+        try {
+          const res = await fetch(WEB_APP_URL);
+          result = await res.json();
+        } catch (e) {
+          console.warn("Cargando modo offline / local inicial", e);
+        }
+
+        viviendas = viviendasBase.map((p) => {
+          let r = Array.isArray(result)
+            ? result.find((item) => Number(item.id) === p.id) || {}
+            : {};
+          let mat = Number(r.presMat) || 0;
+          let mo = Number(r.presMo) || 0;
+          let tr = Number(r.presTrans) || 0;
+
+          return {
+            id: p.id,
+            jefe: "",
+            sector: p.sector,
+            lat: p.lat,
+            lng: p.lng,
+            codigo: r.codigo || `RIB-${p.id.toString().padStart(3, "0")}`,
+            integrantes: r.integrantes || 1,
+            telefono: r.telefono || "",
+            barrio: r.barrio || p.sector,
+            piso: r.piso || "",
+            paredes: r.paredes || "",
+            techo: r.techo || "",
+            ambientes: r.ambientes || 1,
+            estadoGeneral: r.estadoGeneral || "Bueno",
+            fotoFachada: r.fotoFachada || "",
+            fotoInterior: r.fotoInterior || "",
+            fotoArea: r.fotoArea || "",
+            diagDeficiencias: r.diagDeficiencias || "",
+            diagEstadoEstructura: r.diagEstadoEstructura || "",
+            diagObservaciones: r.diagObservaciones || "",
+            malariaAberturas: r.malariaAberturas || "No",
+            malariaTecho: r.malariaTecho || "Bueno",
+            malariaVentanas: r.malariaVentanas || "Sí",
+            malariaAgua: r.malariaAgua || "No",
+            malariaRiesgo: r.malariaRiesgo || "Bajo",
+            propuestaDesc: r.propuestaDesc || "",
+            planoActual: r.planoActual || "",
+            planoIntervencion: r.planoIntervencion || "",
+            presMat: mat,
+            presMo: mo,
+            presTrans: tr,
+            presTotal: mat + mo + tr,
+            valBeneficiario: r.valBeneficiario || "",
+            valTecnico: r.valTecnico || "",
+            valFecha: r.valFecha || "",
+          };
+        });
+
+        mostrarCargando(false);
+        initMapaYLista();
+      }
+
+      function initMapaYLista() {
+        Object.values(markersMap).forEach((m) => map.removeLayer(m));
+        markersMap = {};
+        const bounds = [];
+
+        viviendas.forEach((item) => {
+          const color = coloresSector[item.sector] || "#3b82f6";
+          const customIcon = L.divIcon({
+            className: "",
+            html: `<div class="custom-marker" style="background-color: ${color}">${item.id}</div>`,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+            popupAnchor: [0, -14],
+          });
+
+          const posDisplay = coordenadasDisplay[item.id] || {
+            lat: item.lat,
+            lng: item.lng,
+          };
+          const marker = L.marker([posDisplay.lat, posDisplay.lng], {
+            icon: customIcon,
+          }).addTo(map);
+
+          marker.bindPopup(`
+        <div class="popup-box">
+          <h3>Código: ${item.codigo} (#${item.id})</h3>
+          <p><b>Comunidad:</b> <span style="color:${color}; font-weight:bold;">${item.sector}</span></p>
+          <p><b>Lat:</b> ${item.lat.toFixed(5)}, <b>Lon:</b> ${item.lng.toFixed(5)}</p>
+          <button onclick="abrirEditor(${item.id})" class="btn-edit-ficha" style="margin-top:6px;">Editar Ficha y Planos</button>
+        </div>
+      `);
+
+          markersMap[item.id] = marker;
+          bounds.push([item.lat, item.lng]);
+        });
+
+        if (bounds.length > 0) map.fitBounds(bounds, { padding: [50, 50] });
+        renderLista();
+      }
+
+      function renderLista() {
+        const container = document.getElementById("viviendasList");
+        container.innerHTML = "";
+        const query = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+
+        const filtrados = viviendas.filter((item) => {
+          const cumpleSector =
+            sectorActivo === "TODOS" || item.sector === sectorActivo;
+          const cumpleBusqueda =
+            item.id.toString().includes(query) ||
+            item.codigo.toLowerCase().includes(query) ||
+            item.sector.toLowerCase().includes(query);
+          return cumpleSector && cumpleBusqueda;
+        });
+
+        filtrados.forEach((item) => {
+          const color = coloresSector[item.sector] || "#94a3b8";
+          const card = document.createElement("div");
+          card.className = "vivienda-card";
+          card.style.borderLeftColor = color;
+
+          card.innerHTML = `
+        <div class="vivienda-card-header">
+          <div class="vivienda-info">
+            <h3>Código: ${item.codigo} (#${item.id})</h3>
+            <p><strong>Riesgo:</strong> ${item.malariaRiesgo} | <strong>Total:</strong> Bs ${item.presTotal}</p>
+            <p><strong>Planos:</strong> ${item.planoIntervencion ? "📄 Subido" : "❌ Pendiente"}</p>
+          </div>
+          <span class="badge-sector" style="background-color:${color}">${item.sector}</span>
+        </div>
+        <button class="btn-edit-ficha" onclick="centrarYEditar(${item.id})">Editar Ficha y Planos</button>
+      `;
+
+          container.appendChild(card);
+        });
+      }
+
+      function centrarYEditar(id) {
+        const pos =
+          coordenadasDisplay[id] || viviendas.find((v) => v.id === id);
+        if (pos) map.flyTo([pos.lat, pos.lng], 18, { duration: 1.0 });
+        abrirEditor(id);
+      }
+
+      function filtrarSector(sector, btn) {
+        sectorActivo = sector;
+        document
+          .querySelectorAll(".filter-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        viviendas.forEach((item) => {
+          if (sectorActivo === "TODOS" || item.sector === sectorActivo) {
+            map.addLayer(markersMap[item.id]);
+          } else {
+            map.removeLayer(markersMap[item.id]);
+          }
+        });
+
+        renderLista();
+      }
+
+      function filtrarViviendas() {
+        renderLista();
+      }
+
+      function abrirEditor(id) {
+        vSel = viviendas.find((v) => v.id === id);
+        if (!vSel) return;
+
+        actualizarContador();
+
+        document.getElementById("codigo").value = vSel.codigo;
+        document.getElementById("jefe").value = "";
+        document.getElementById("integrantes").value = vSel.integrantes;
+        document.getElementById("telefono").value = vSel.telefono;
+        document.getElementById("barrio").value = vSel.barrio;
+        document.getElementById("gps").value = `${vSel.lat}, ${vSel.lng}`;
+
+        document.getElementById("mat-piso").value = vSel.piso;
+        document.getElementById("mat-paredes").value = vSel.paredes;
+        document.getElementById("mat-techo").value = vSel.techo;
+        document.getElementById("ambientes").value = vSel.ambientes;
+        document.getElementById("estado-general").value = vSel.estadoGeneral;
+
+        document.getElementById("foto-fachada").value = "";
+        document.getElementById("status-foto-fachada").innerText =
+          vSel.fotoFachada ? "✓ Imagen cargada" : "";
+
+        document.getElementById("foto-interior").value = "";
+        document.getElementById("status-foto-interior").innerText =
+          vSel.fotoInterior ? "✓ Imagen cargada" : "";
+
+        document.getElementById("foto-area").value = "";
+        document.getElementById("status-foto-area").innerText = vSel.fotoArea
+          ? "✓ Imagen cargada"
+          : "";
+
+        document.getElementById("diag-deficiencias").value =
+          vSel.diagDeficiencias;
+        document.getElementById("diag-estructura").value =
+          vSel.diagEstadoEstructura;
+        document.getElementById("diag-observaciones").value =
+          vSel.diagObservaciones;
+
+        document.getElementById("malaria-aberturas").value =
+          vSel.malariaAberturas;
+        document.getElementById("malaria-techo").value = vSel.malariaTecho;
+        document.getElementById("malaria-ventanas").value =
+          vSel.malariaVentanas;
+        document.getElementById("malaria-agua").value = vSel.malariaAgua;
+        document.getElementById("malaria-riesgo").value = vSel.malariaRiesgo;
+
+        document.getElementById("propuesta-desc").value = vSel.propuestaDesc;
+
+        document.getElementById("plano-actual").value = "";
+        document.getElementById("status-plano-actual").innerText =
+          vSel.planoActual ? "✓ Documento (Word/PDF) cargado" : "";
+
+        document.getElementById("plano-intervencion").value = "";
+        document.getElementById("status-plano-intervencion").innerText =
+          vSel.planoIntervencion ? "✓ Documento (Word/PDF) cargado" : "";
+
+        document.getElementById("pres-mat").value = vSel.presMat;
+        document.getElementById("pres-mo").value = vSel.presMo;
+        document.getElementById("pres-trans").value = vSel.presTrans;
+        calcularTotalPresupuesto();
+
+        document.getElementById("val-beneficiario").value =
+          vSel.valBeneficiario;
+        document.getElementById("val-tecnico").value = vSel.valTecnico;
+        document.getElementById("val-fecha").value = vSel.valFecha;
+
+        pasoActual = 1;
+        actualizarPasosWizard();
+        document.getElementById("editor-overlay").style.display = "flex";
+      }
+
+      function actualizarContador() {
+        const index = viviendas.findIndex((v) => v.id === vSel.id);
+        document.getElementById("ficha-counter").innerText =
+          `Ficha ${index + 1} de ${viviendas.length}`;
+      }
+
+      async function navegarFicha(dir) {
+        if (!vSel) return;
+        await sincronizarEnMemoria();
+        let idx = viviendas.findIndex((v) => v.id === vSel.id) + dir;
+        if (idx < 0) idx = viviendas.length - 1;
+        if (idx >= viviendas.length) idx = 0;
+        abrirEditor(viviendas[idx].id);
+      }
+
+      async function sincronizarEnMemoria() {
+        if (!vSel) return;
+        vSel.codigo = document.getElementById("codigo").value;
+        vSel.jefe = "";
+        vSel.integrantes = document.getElementById("integrantes").value;
+        vSel.telefono = document.getElementById("telefono").value;
+        vSel.barrio = document.getElementById("barrio").value;
+
+        vSel.piso = document.getElementById("mat-piso").value;
+        vSel.paredes = document.getElementById("mat-paredes").value;
+        vSel.techo = document.getElementById("mat-techo").value;
+        vSel.ambientes = document.getElementById("ambientes").value;
+        vSel.estadoGeneral = document.getElementById("estado-general").value;
+
+        const fileFachada = document.getElementById("foto-fachada").files[0];
+        if (fileFachada)
+          vSel.fotoFachada = await leerArchivoComoBase64(fileFachada);
+
+        const fileInterior = document.getElementById("foto-interior").files[0];
+        if (fileInterior)
+          vSel.fotoInterior = await leerArchivoComoBase64(fileInterior);
+
+        const fileArea = document.getElementById("foto-area").files[0];
+        if (fileArea) vSel.fotoArea = await leerArchivoComoBase64(fileArea);
+
+        vSel.diagDeficiencias =
+          document.getElementById("diag-deficiencias").value;
+        vSel.diagEstadoEstructura =
+          document.getElementById("diag-estructura").value;
+        vSel.diagObservaciones =
+          document.getElementById("diag-observaciones").value;
+
+        vSel.malariaAberturas =
+          document.getElementById("malaria-aberturas").value;
+        vSel.malariaTecho = document.getElementById("malaria-techo").value;
+        vSel.malariaVentanas =
+          document.getElementById("malaria-ventanas").value;
+        vSel.malariaAgua = document.getElementById("malaria-agua").value;
+        vSel.malariaRiesgo = document.getElementById("malaria-riesgo").value;
+
+        vSel.propuestaDesc = document.getElementById("propuesta-desc").value;
+
+        const filePlanoAct = document.getElementById("plano-actual").files[0];
+        if (filePlanoAct)
+          vSel.planoActual = await leerArchivoComoBase64(filePlanoAct);
+
+        const filePlanoInt =
+          document.getElementById("plano-intervencion").files[0];
+        if (filePlanoInt)
+          vSel.planoIntervencion = await leerArchivoComoBase64(filePlanoInt);
+
+        vSel.presMat = Number(document.getElementById("pres-mat").value) || 0;
+        vSel.presMo = Number(document.getElementById("pres-mo").value) || 0;
+        vSel.presTrans =
+          Number(document.getElementById("pres-trans").value) || 0;
+        vSel.presTotal = vSel.presMat + vSel.presMo + vSel.presTrans;
+
+        vSel.valBeneficiario =
+          document.getElementById("val-beneficiario").value;
+        vSel.valTecnico = document.getElementById("val-tecnico").value;
+        vSel.valFecha = document.getElementById("val-fecha").value;
+      }
+
+      async function guardarCambios() {
+        if (!vSel) return;
+        await sincronizarEnMemoria();
+        mostrarCargando(true);
+        try {
+          await fetch(WEB_APP_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(vSel),
+          });
+          mostrarToast("✔ ¡Ficha y Planos guardados con éxito!");
+        } catch (e) {
+          console.error("Error al guardar:", e);
+          mostrarToast("❌ Error al guardar en Sheets");
+        }
+        mostrarCargando(false);
+        cerrarEditor();
+        renderLista();
+      }
+
+      function cerrarEditor() {
+        document.getElementById("editor-overlay").style.display = "none";
+        vSel = null;
+      }
+
+      function irAPaso(paso) {
+        if (paso < 1 || paso > totalPasos) return;
+        pasoActual = paso;
+        actualizarPasosWizard();
+      }
+
+      function cambiarPaso(delta) {
+        irAPaso(pasoActual + delta);
+      }
+
+      function actualizarPasosWizard() {
+        for (let i = 1; i <= totalPasos; i++) {
+          const sec = document.getElementById(`step-${i}`);
+          const dot = document.getElementById(`dot-${i}`);
+          if (sec) sec.classList.toggle("active-step", i === pasoActual);
+          if (dot) {
+            dot.classList.toggle("active", i === pasoActual);
+            dot.classList.toggle("completed", i < pasoActual);
+          }
+        }
+        const btnAnt = document.getElementById("btn-anterior");
+        const btnSig = document.getElementById("btn-siguiente");
+
+        if (btnAnt)
+          btnAnt.style.display = pasoActual === 1 ? "none" : "inline-block";
+        if (btnSig)
+          btnSig.style.display =
+            pasoActual === totalPasos ? "none" : "inline-block";
+      }
+
+      function exportarGPX() {
+        let gpx = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="CatastroGPS">\n`;
+        viviendas.forEach((v) => {
+          gpx += `  <wpt lat="${v.lat}" lon="${v.lng}">\n    <name>${v.codigo} (#${v.id})</name>\n    <cmt>Comunidad: ${v.sector}</cmt>\n  </wpt>\n`;
+        });
+        gpx += `</gpx>`;
+        descargarArchivo(gpx, "35_viviendas_gps.gpx", "application/gpx+xml");
+      }
+
+      function exportarKML() {
+        let kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n  <Document>\n    <name>35 Viviendas Catastro</name>\n`;
+        viviendas.forEach((v) => {
+          kml += `    <Placemark>\n      <name>${v.codigo} (#${v.id})</name>\n      <description>Comunidad: ${v.sector}</description>\n      <Point>\n        <coordinates>${v.lng},${v.lat},0</coordinates>\n      </Point>\n    </Placemark>\n`;
+        });
+        kml += `  </Document>\n</kml>`;
+        descargarArchivo(
+          kml,
+          "35_viviendas.kml",
+          "application/vnd.google-earth.kml+xml",
+        );
+      }
+
+      function exportarCSV() {
+        let csv =
+          "ID,Codigo,Comunidad,Latitud,Longitud,Riesgo_Malaria,Presupuesto_Total\n";
+        viviendas.forEach((v) => {
+          csv += `"${v.id}","${v.codigo}","${v.sector}",${v.lat},${v.lng},"${v.malariaRiesgo}",${v.presTotal}\n`;
+        });
+        descargarArchivo(csv, "35_viviendas.csv", "text/csv");
+      }
+
+      function descargarArchivo(contenido, nombre, tipo) {
+        const blob = new Blob([contenido], { type: tipo });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = nombre;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      window.onload = cargarDatosDesdeGoogleSheets;
+    </script>
+  </body>
+</html>
